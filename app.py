@@ -159,6 +159,8 @@ def tambah_barang_keluar_route():
     return redirect(url_for("barang_keluar"))
 
 
+# Buat tabel database saat app dijalankan oleh Heroku/Gunicorn
+init_database()
+
 if __name__ == "__main__":
-    init_database()
     app.run(debug=True)
