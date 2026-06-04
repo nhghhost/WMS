@@ -78,6 +78,7 @@ def init_database():
     cursor.execute("""
         ALTER TABLE barang_keluar
         ADD COLUMN IF NOT EXISTS nama VARCHAR(50)
+        ADD COLUMN IF NOT EXISTS jenis_keluar VARCHAR(20)
     """)
 
     conn.commit()
@@ -440,18 +441,17 @@ def ambil_semua_barang_keluar():
     cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     cursor.execute("""
-        SELECT 
+        SELECT
             barang_keluar.id_keluar,
-            TO_CHAR(barang_keluar.tanggal, 'DD-MM-YYYY HH24:MI') AS tanggal,
+            TO_CHAR(barang_keluar.tanggal, 'DD-MM-YYYY HH24:MI:SS') AS tanggal,
             barang_keluar.jumlah,
-            barang_keluar.nama,
             barang_keluar.jenis_keluar,
+            barang_keluar.nama,
             barang.nama_barang,
             barang.satuan
         FROM barang_keluar
-        JOIN barang
-            ON barang_keluar.id_barang = barang.id_barang
-        ORDER BY barang_keluar.tanggal DESC
+        JOIN barang ON barang_keluar.id_barang = barang.id_barang
+        ORDER BY barang_keluar.id_keluar DESC
     """)
 
     data = cursor.fetchall()
