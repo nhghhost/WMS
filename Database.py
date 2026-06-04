@@ -391,7 +391,7 @@ def tambah_barang_keluar(id_barang, jumlah, tanggal, jenis_keluar, nama):
         conn.close()
         return False, "Barang tidak ditemukan"
 
-    if barang["stok"] < jumlah:
+    if barang["stok"] < jumlah and jenis_keluar in ["habis", "pinjam"]:
         cursor.close()
         conn.close()
         return False, "Stok tidak cukup untuk barang keluar"
