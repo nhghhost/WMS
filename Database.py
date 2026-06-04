@@ -85,6 +85,11 @@ def init_database():
         ADD COLUMN IF NOT EXISTS jenis_keluar VARCHAR(20)
     """)
 
+    cursor.execute("""
+        ALTER TABLE barang_masuk
+            ADD COLUMN IF EXISTS nama_barang TEXT NOT NULL UNIQUE
+    """)
+
     conn.commit()
     cursor.close()
     conn.close()
