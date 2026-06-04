@@ -216,7 +216,7 @@ def ambil_semua_barang_masuk():
             barang.satuan
         FROM barang_masuk
         JOIN barang ON barang_masuk.id_barang = barang.id_barang
-        ORDER BY barang_masuk.id_masuk DESC
+        ORDER BY barang_masuk.nama_barang DESC
     """)
 
     data = cursor.fetchall()
