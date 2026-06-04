@@ -150,7 +150,7 @@ def ambil_semua_barang():
     cursor.execute("""
         SELECT id_barang, nama_barang, stok, satuan, stok_minimal
         FROM barang
-        ORDER BY nama_barang DESC
+        ORDER BY nama_barang ASC
     """)
 
     data = cursor.fetchall()
@@ -216,7 +216,7 @@ def ambil_semua_barang_masuk():
             barang.satuan
         FROM barang_masuk
         JOIN barang ON barang_masuk.id_barang = barang.id_barang
-        ORDER BY barang_masuk.nama_barang DESC
+        ORDER BY barang_masuk.nama_barang ASC
     """)
 
     data = cursor.fetchall()
