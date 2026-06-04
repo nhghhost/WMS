@@ -87,7 +87,7 @@ def init_database():
 
     cursor.execute("""
         ALTER TABLE barang_masuk
-            ADD COLUMN IF EXISTS nama_barang TEXT NOT NULL UNIQUE
+        ADD COLUMN IF NOT EXISTS nama_barang TEXT NOT NULL UNIQUE
     """)
 
     conn.commit()
