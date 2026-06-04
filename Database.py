@@ -150,7 +150,7 @@ def ambil_semua_barang():
     cursor.execute("""
         SELECT id_barang, nama_barang, stok, satuan, stok_minimal
         FROM barang
-        ORDER BY id_barang DESC
+        ORDER BY nama_barang DESC
     """)
 
     data = cursor.fetchall()
