@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barang Masuk - VJS WMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <title>Barang Masuk - WMS BJS</title>
 
     <style>
         * {
@@ -127,9 +128,8 @@
 
         .form-grid {
             display: grid;
-            grid-template-columns: 1.5fr 1fr auto;
+            grid-template-columns: 1fr 2fr 1fr 1fr;
             gap: 14px;
-            align-items: end;
         }
 
         .form-group label {
@@ -182,6 +182,24 @@
             text-align: center;
             color: #64748b;
             padding: 28px;
+        }
+
+        .edit-btn {
+            background: #2563eb;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .delete-btn {
+            background: #2563eb;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 13px;
         }
 
         @media (max-width: 800px) {
@@ -237,6 +255,7 @@
                             <th>Nama Barang</th>
                             <th>Jumlah Masuk</th>
                             <th>Satuan</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
 
@@ -249,6 +268,11 @@
                             <td>{{ item["nama_barang"] }}</td>
                             <td class="jumlah">+{{ item["jumlah"] }}</td>
                             <td>{{ item["satuan"] }}</td>
+                            <td><a href="/edit-barang-masuk/{{ item['id_masuk'] }}" class="edit-btn">Edit</a>
+
+                                <a href="/hapus-barang-masuk/{{ item['id_masuk'] }}" class="delete-btn"
+                                    onclick="return confirm('Yakin hapus data?')">Hapus</a>
+                            </td>
                         </tr>
                         {% endfor %}
                         {% else %}
@@ -265,6 +289,11 @@
             <h2 class="card-title">Tambah Barang Masuk</h2>
 
             <form class="form-grid" action="/tambah-barang-masuk" method="POST">
+                <div class="form-group">
+                    <label for="tanggal">Tanggal</label>
+                    <input type="date" id="tanggal" name="tanggal" required>
+                </div>
+
                 <div class="form-group">
                     <label for="idBarang">Nama Barang</label>
                     <select id="idBarang" name="id_barang" required>
@@ -314,6 +343,18 @@
                 }
             }
         }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+    <script>
+        new TomSelect("#idBarang", {
+            create: false,
+            sortField: {
+                field: "text",
+                direction: "asc"
+            }
+        });
     </script>
 
 </body>

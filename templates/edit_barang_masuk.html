@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Barang Masuk</title>
+</head>
+
+<body>
+
+    <h1>Edit Barang Masuk</h1>
+
+    <form action="/update-barang-masuk/{{ data['id_masuk'] }}" method="POST">
+
+        <label>Tanggal</label>
+        <input type="date" name="tanggal" value="{{ data['tanggal'].strftime('%Y-%m-%d') }}" required>
+
+        <br><br>
+
+        <label>Barang</label>
+
+        <select disabled>
+            {% for barang in barang_list %}
+            <option value="{{ barang['id_barang'] }}" {% if barang['id_barang']==data['id_barang'] %} selected {% endif
+                %}>
+                {{ barang['nama_barang'] }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <br><br>
+
+        <label>Jumlah</label>
+
+        <input type="number" name="jumlah" value="{{ data['jumlah'] }}" min="1" required>
+
+        <br><br>
+
+        <button type="submit">
+            Simpan Perubahan
+        </button>
+
+        <a href="/barang-masuk">
+            Batal
+        </a>
+
+    </form>
+
+</body>
+
+</html>

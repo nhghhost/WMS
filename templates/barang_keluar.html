@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barang Keluar - VJS WMS</title>
+    <title>Barang Keluar - WMS BJS</title>
 
     <style>
         * {
@@ -127,9 +127,8 @@
 
         .form-grid {
             display: grid;
-            grid-template-columns: 1.5fr 1fr auto;
+            grid-template-columns: 1fr 2fr 1fr 1fr;
             gap: 14px;
-            align-items: end;
         }
 
         .form-group label {
@@ -156,11 +155,15 @@
             box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
         }
 
+        .button-area {
+            margin-top: 18px;
+        }
+
         .submit-button {
             border: none;
             background: #dc2626;
             color: white;
-            padding: 14px 20px;
+            padding: 12px 24px;
             border-radius: 14px;
             font-size: 15px;
             font-weight: 700;
@@ -201,6 +204,15 @@
             background: #fee2e2;
             color: #991b1b;
             border-left: 5px solid #ef4444;
+        }
+
+        .delete-btn {
+            background: #2563eb;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 13px;
         }
 
         @media (max-width: 800px) {
@@ -266,6 +278,9 @@
                             <th>Nama Barang</th>
                             <th>Jumlah Keluar</th>
                             <th>Satuan</th>
+                            <th>Jenis Keluar</th>
+                            <th>Nama</th>
+                            <th>Aksi</th>
                         </tr>
                     </thead>
 
@@ -278,11 +293,18 @@
                             <td>{{ item["nama_barang"] }}</td>
                             <td class="jumlah">-{{ item["jumlah"] }}</td>
                             <td>{{ item["satuan"] }}</td>
+                            <td>{{ item["jenis_keluar"] }}</td>
+                            <td>{{ item["nama"] }}</td>
+                            <td>
+                                <a href="/hapus-barang-keluar/{{ item['id_keluar'] }}" class="delete-btn"
+                                    onclick="return confirm('Yakin hapus data?')">Hapus</a>
+                            </td>
                         </tr>
                         {% endfor %}
                         {% else %}
                         <tr>
-                            <td colspan="5" class="empty-data">Belum ada data barang keluar.</td>
+                            <td colspan=" 7" class="empty-data">Belum ada data barang keluar.
+                            </td>
                         </tr>
                         {% endif %}
                     </tbody>
@@ -294,6 +316,11 @@
             <h2 class="card-title">Tambah Barang Keluar</h2>
 
             <form class="form-grid" action="/tambah-barang-keluar" method="POST">
+                <div class="form-group">
+                    <label for="tanggal">Tanggal</label>
+                    <input type="datetime-local" id="tanggal" name="tanggal" required>
+                </div>
+
                 <div class="form-group">
                     <label for="idBarang">Nama Barang</label>
                     <select id="idBarang" name="id_barang" required>
@@ -308,11 +335,32 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="jenis_keluar">Jenis Keluar</label>
+
+                    <select id="jenis_keluar" name="jenis_keluar" required>
+                        <option value="">Pilih Jenis</option>
+                        <option value="sebagian">Sebagian</option>
+                        <option value="pinjam">Pinjam</option>
+                        <option value="habis">Habis</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label for="jumlah">Jumlah Keluar</label>
                     <input type="number" id="jumlah" name="jumlah" placeholder="0" min="1" required>
                 </div>
 
-                <button type="submit" class="submit-button">Tambah</button>
+                <div class="form-group">
+                    <label for="petugas">Nama</label>
+                    <input type="text" id="nama" name="nama" placeholder="Masukkan Nama......" required>
+                </div>
+
+                <div class="button-area">
+                    <button type="submit" class="submit-button">
+                        Tambah Barang Keluar
+                    </button>
+                </div>
+
             </form>
 
             <p class="note">
