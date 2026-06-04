@@ -78,6 +78,10 @@ def init_database():
     cursor.execute("""
         ALTER TABLE barang_keluar
         ADD COLUMN IF NOT EXISTS nama VARCHAR(50)
+    """)
+
+    cursor.execute("""
+        ALTER TABLE barang_keluar
         ADD COLUMN IF NOT EXISTS jenis_keluar VARCHAR(20)
     """)
 
