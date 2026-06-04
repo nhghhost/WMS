@@ -156,11 +156,15 @@
             box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
         }
 
+        .button-area {
+            margin-top: 18px;
+        }
+
         .submit-button {
             border: none;
             background: #16a34a;
             color: white;
-            padding: 14px 20px;
+            padding: 12px 24px;
             border-radius: 14px;
             font-size: 15px;
             font-weight: 700;
@@ -241,6 +245,46 @@
         </div>
 
         <div class="card">
+            <h2 class="card-title">Tambah Barang Masuk</h2>
+
+            <form class="form-grid" action="/tambah-barang-masuk" method="POST">
+                <div class="form-group">
+                    <label for="tanggal">Tanggal</label>
+                    <input type="date" id="tanggal" name="tanggal" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="idBarang">Nama Barang</label>
+                    <select id="idBarang" name="id_barang" required>
+                        <option value="">Pilih barang dari stok</option>
+
+                        {% for barang in barang_list %}
+                        <option value="{{ barang['id_barang'] }}">
+                            {{ barang["nama_barang"] }} - Stok: {{ barang["stok"] }} {{ barang["satuan"] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="jumlah">Jumlah Masuk</label>
+                    <input type="number" id="jumlah" name="jumlah" placeholder="0" min="1" required>
+                </div>
+
+                <div class="button-area">
+                    <button type="submit" class="submit-button">
+                        Tambah
+                    </button>
+                </div>
+            </form>
+
+            <p class="note">
+                Nama barang diambil dari menu Stock Barang. Kalau barang belum ada, tambahkan dulu di halaman Stock
+                Barang.
+            </p>
+        </div>
+
+        <div class="card">
             <h2 class="card-title">Riwayat Barang Masuk</h2>
 
             <input type="text" class="search-box" placeholder="Cari nama barang..." id="searchInput"
@@ -285,77 +329,39 @@
             </div>
         </div>
 
-        <div class="card">
-            <h2 class="card-title">Tambah Barang Masuk</h2>
+        <script>
+            function cariBarangMasuk() {
+                let input = document.getElementById("searchInput").value.toLowerCase();
+                let table = document.getElementById("tabelBarangMasuk");
+                let rows = table.getElementsByTagName("tr");
 
-            <form class="form-grid" action="/tambah-barang-masuk" method="POST">
-                <div class="form-group">
-                    <label for="tanggal">Tanggal</label>
-                    <input type="date" id="tanggal" name="tanggal" required>
-                </div>
+                for (let i = 1; i < rows.length; i++) {
+                    let namaBarang = rows[i].getElementsByTagName("td")[2];
 
-                <div class="form-group">
-                    <label for="idBarang">Nama Barang</label>
-                    <select id="idBarang" name="id_barang" required>
-                        <option value="">Pilih barang dari stok</option>
+                    if (namaBarang) {
+                        let textValue = namaBarang.textContent || namaBarang.innerText;
 
-                        {% for barang in barang_list %}
-                        <option value="{{ barang['id_barang'] }}">
-                            {{ barang["nama_barang"] }} - Stok: {{ barang["stok"] }} {{ barang["satuan"] }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="jumlah">Jumlah Masuk</label>
-                    <input type="number" id="jumlah" name="jumlah" placeholder="0" min="1" required>
-                </div>
-
-                <button type="submit" class="submit-button">Tambah</button>
-            </form>
-
-            <p class="note">
-                Nama barang diambil dari menu Stock Barang. Kalau barang belum ada, tambahkan dulu di halaman Stock
-                Barang.
-            </p>
-        </div>
-
-    </div>
-
-    <script>
-        function cariBarangMasuk() {
-            let input = document.getElementById("searchInput").value.toLowerCase();
-            let table = document.getElementById("tabelBarangMasuk");
-            let rows = table.getElementsByTagName("tr");
-
-            for (let i = 1; i < rows.length; i++) {
-                let namaBarang = rows[i].getElementsByTagName("td")[2];
-
-                if (namaBarang) {
-                    let textValue = namaBarang.textContent || namaBarang.innerText;
-
-                    if (textValue.toLowerCase().indexOf(input) > -1) {
-                        rows[i].style.display = "";
-                    } else {
-                        rows[i].style.display = "none";
+                        if (textValue.toLowerCase().indexOf(input) > -1) {
+                            rows[i].style.display = "";
+                        } else {
+                            rows[i].style.display = "none";
+                        }
                     }
                 }
             }
-        }
-    </script>
+        </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
-    <script>
-        new TomSelect("#idBarang", {
-            create: false,
-            sortField: {
-                field: "text",
-                direction: "asc"
-            }
-        });
-    </script>
+        <script>
+            new TomSelect("#idBarang", {
+                create: false,
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                }
+            });
+        </script>
 
 </body>
 

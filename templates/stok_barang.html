@@ -293,6 +293,43 @@
         {% endwith %}
 
         <div class="card">
+            <h2 class="card-title">Tambah Barang Baru</h2>
+
+            <form class="form-grid" action="/tambah-barang" method="POST">
+                <div class="form-group">
+                    <label for="namaBarang">Nama Barang</label>
+                    <input type="text" id="namaBarang" name="nama_barang" placeholder="Contoh: Lakban Coklat" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="stokBarang">Stock Awal</label>
+                    <input type="number" id="stokBarang" name="stok" placeholder="0" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="satuanBarang">Satuan</label>
+                    <select id="satuanBarang" name="satuan" required>
+                        <option value="">Pilih satuan</option>
+                        <option value="Pcs">Pcs</option>
+                        <option value="Unit">Unit</option>
+                        <option value="Box">Box</option>
+                        <option value="Pack">Pack</option>
+                        <option value="Roll">Roll</option>
+                        <option value="Kg">Kg</option>
+                        <option value="Liter">Liter</option>
+                        <option value="Meter">Meter</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="submit-button">Tambah</button>
+            </form>
+
+            <p class="note">
+                Data barang sekarang disimpan ke SQLite, jadi tidak hilang saat halaman di-refresh.
+            </p>
+        </div>
+
+        <div class="card">
             <h2 class="card-title">Daftar Stock Barang</h2>
 
             <input type="text" class="search-box" placeholder="Cari nama barang..." id="searchInput"
@@ -345,44 +382,6 @@
                 </table>
             </div>
         </div>
-
-        <div class="card">
-            <h2 class="card-title">Tambah Barang Baru</h2>
-
-            <form class="form-grid" action="/tambah-barang" method="POST">
-                <div class="form-group">
-                    <label for="namaBarang">Nama Barang</label>
-                    <input type="text" id="namaBarang" name="nama_barang" placeholder="Contoh: Lakban Coklat" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="stokBarang">Stock Awal</label>
-                    <input type="number" id="stokBarang" name="stok" placeholder="0" min="0" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="satuanBarang">Satuan</label>
-                    <select id="satuanBarang" name="satuan" required>
-                        <option value="">Pilih satuan</option>
-                        <option value="Pcs">Pcs</option>
-                        <option value="Unit">Unit</option>
-                        <option value="Box">Box</option>
-                        <option value="Pack">Pack</option>
-                        <option value="Roll">Roll</option>
-                        <option value="Kg">Kg</option>
-                        <option value="Liter">Liter</option>
-                        <option value="Meter">Meter</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="submit-button">Tambah</button>
-            </form>
-
-            <p class="note">
-                Data barang sekarang disimpan ke SQLite, jadi tidak hilang saat halaman di-refresh.
-            </p>
-        </div>
-
     </div>
 
     <script>

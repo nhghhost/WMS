@@ -85,11 +85,6 @@ def init_database():
         ADD COLUMN IF NOT EXISTS jenis_keluar VARCHAR(20)
     """)
 
-    cursor.execute("""
-        ALTER TABLE barang_masuk
-        ADD COLUMN IF NOT EXISTS nama_barang TEXT NOT NULL UNIQUE
-    """)
-
     conn.commit()
     cursor.close()
     conn.close()
@@ -113,7 +108,7 @@ def cek_barang_sudah_ada(nama_barang):
     return data is not None
 
 
-def tambah_barang(nama_barang, stok, satuan, stok_minimal=20):
+def tambah_barang(nama_barang, stok, satuan, stok_minimal=5):
     nama_barang = nama_barang.strip()
     satuan = satuan.strip()
 
@@ -142,10 +137,6 @@ def tambah_barang(nama_barang, stok, satuan, stok_minimal=20):
         conn.close()
 
         return False, "Barang sudah ada di database"
-
-    finally:
-        cursor.close()
-        conn.close()
 
 
 def ambil_semua_barang():
@@ -221,7 +212,7 @@ def ambil_semua_barang_masuk():
             barang.satuan
         FROM barang_masuk
         JOIN barang ON barang_masuk.id_barang = barang.id_barang
-        ORDER BY barang_masuk.nama_barang ASC
+        ORDER BY barang.nama_barang ASC
     """)
 
     data = cursor.fetchall()
@@ -301,10 +292,6 @@ def update_barang_masuk(id_masuk, jumlah_baru, tanggal_baru):
         conn.close()
 
         return False, str(e)
-
-    finally:
-        cursor.close()
-        conn.close()
 
 def ambil_barang_masuk_by_id(id_masuk):
     conn = get_connection()
