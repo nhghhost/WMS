@@ -268,43 +268,70 @@
             <h2 class="card-title">Tambah Barang Keluar</h2>
 
             <form class="form-grid" action="/tambah-barang-keluar" method="POST">
+
+                <!-- Tanggal -->
                 <div class="form-group">
-                    <label for="tanggal">Tanggal</label>
-                    <input type="datetime-local" id="tanggal" name="tanggal" required>
+                    <label>Tanggal</label>
+                    <input type="datetime-local" name="tanggal" required>
                 </div>
 
+                <!-- Nama -->
                 <div class="form-group">
-                    <label for="idBarang">Nama Barang</label>
-                    <select id="idBarang" name="id_barang" required>
-                        <option value="">Pilih barang dari stok</option>
-
-                        {% for barang in barang_list %}
-                        <option value="{{ barang['id_barang'] }}">
-                            {{ barang["nama_barang"] }} - Stok: {{ barang["stok"] }} {{ barang["satuan"] }}
-                        </option>
-                        {% endfor %}
-                    </select>
+                    <label>Nama</label>
+                    <input type="text" name="nama" placeholder="Masukkan Nama..." required>
                 </div>
 
-                <div class="form-group">
-                    <label for="jenis_keluar">Jenis Keluar</label>
+                <!-- Daftar Barang -->
+                <div class="form-group" style="grid-column:1/-1;">
+                    <label>Daftar Barang</label>
 
-                    <select id="jenis_keluar" name="jenis_keluar" required>
-                        <option value="">Pilih Jenis</option>
-                        <option value="sebagian">Sebagian</option>
-                        <option value="pinjam">Pinjam</option>
-                        <option value="habis">Habis</option>
-                    </select>
-                </div>
+                    <div id="barang-container">
 
-                <div class="form-group">
-                    <label for="jumlah">Jumlah Keluar</label>
-                    <input type="number" id="jumlah" name="jumlah" placeholder="0" min="1" required>
-                </div>
+                        <div class="barang-item" style="display:grid;
+                       grid-template-columns:2fr 1fr 1fr auto;
+                       gap:10px;
+                       margin-bottom:10px;">
 
-                <div class="form-group">
-                    <label for="petugas">Nama</label>
-                    <input type="text" id="nama" name="nama" placeholder="Masukkan Nama......" required>
+                            <!-- Barang -->
+                            <select class="barang-select" name="id_barang" required>
+                                <option value="">Pilih Barang</option>
+
+                                {% for barang in barang_list %}
+                                <option value="{{ barang['id_barang'] }}">
+                                    {{ barang["nama_barang"] }} - Stok:
+                                    {{ barang["stok"] }} {{ barang["satuan"] }}
+                                </option>
+                                {% endfor %}
+                            </select>
+
+                            <!-- Jumlah -->
+                            <input type="number" name="jumlah" min="1" placeholder="Jumlah" required>
+
+                            <!-- Jenis -->
+                            <select name="jenis_keluar" required>
+                                <option value="">Jenis</option>
+                                <option value="sebagian">Sebagian</option>
+                                <option value="pinjam">Pinjam</option>
+                                <option value="habis">Habis</option>
+                            </select>
+
+                            <!-- Hapus -->
+                            <button type="button" class="hapus-barang" onclick="hapusBarang(this)"
+                                style="display:none;">
+                                ✕
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <button type="button" onclick="tambahBarang()" class="submit-button"
+                        style="margin-top:10px;background:#2563eb;">
+
+                        + Tambah Barang
+
+                    </button>
+
                 </div>
 
                 <div class="button-area">
@@ -395,12 +422,81 @@
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 
     <script>
-        new TomSelect("#idBarang", {
-            create: false,
-            sortField: {
-                field: "text",
-                direction: "asc"
-            }
+        function tambahBarang() {
+
+            const container = document.getElementById("barang-container");
+
+            const div = document.createElement("div");
+
+            div.className = "barang-item";
+
+            div.style.display = "grid";
+            div.style.gridTemplateColumns = "2fr 1fr 1fr auto";
+            div.style.gap = "10px";
+            div.style.marginBottom = "10px";
+
+            div.innerHTML = `
+        <select class="barang-select" name="id_barang" required>
+            <option value="">Pilih Barang</option>
+
+            {% for barang in barang_list %}
+            <option value="{{ barang['id_barang'] }}">
+                {{ barang["nama_barang"] }} - Stok:
+                {{ barang["stok"] }} {{ barang["satuan"] }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <input
+            type="number"
+            name="jumlah"
+            min="1"
+            placeholder="Jumlah"
+            required>
+
+        <select name="jenis_keluar" required>
+            <option value="">Jenis</option>
+            <option value="sebagian">Sebagian</option>
+            <option value="pinjam">Pinjam</option>
+            <option value="habis">Habis</option>
+        </select>
+
+        <button
+            type="button"
+            class="hapus-barang"
+            onclick="hapusBarang(this)">
+            ✕
+        </button>
+    `;
+
+            container.appendChild(div);
+
+            new TomSelect(div.querySelector(".barang-select"), {
+                create: false,
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                }
+            });
+
+        }
+
+        function hapusBarang(btn) {
+
+            btn.parentElement.remove();
+
+        }
+
+        document.querySelectorAll(".barang-select").forEach(el => {
+
+            new TomSelect(el, {
+                create: false,
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                }
+            });
+
         });
     </script>
 

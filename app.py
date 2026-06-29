@@ -163,10 +163,10 @@ def barang_keluar():
 
 @app.route("/tambah-barang-keluar", methods=["POST"])
 def tambah_barang_keluar_route():
-    id_barang = request.form.get("id_barang")
-    jumlah = request.form.get("jumlah")
+    id_barang = request.form.getlist("id_barang")
+    jumlah = request.form.getlist("jumlah")
     tanggal = request.form.get("tanggal")
-    jenis_keluar = request.form.get("jenis_keluar")
+    jenis_keluar = request.form.getlist("jenis_keluar")
     nama = request.form.get("nama")
 
     if not id_barang or not jumlah or not tanggal or not jenis_keluar or not nama:
@@ -174,20 +174,31 @@ def tambah_barang_keluar_route():
         return redirect(url_for("barang_keluar"))
 
     try:
-        id_barang = int(id_barang)
-        jumlah = int(jumlah)
         tanggal = datetime.fromisoformat(tanggal)
-        jenis_keluar = str(jenis_keluar)
-        nama = str(nama)
     except ValueError:
-        flash("Data Bermasalah", "error")
+        flash("Tanggal tidak valid", "error")
         return redirect(url_for("barang_keluar"))
 
-    if jumlah <= 0:
-        flash("Jumlah barang keluar harus lebih dari 0", "error")
-        return redirect(url_for("barang_keluar"))
+    nama = nama.strip()
 
-    sukses, pesan = tambah_barang_keluar(id_barang, jumlah, tanggal, jenis_keluar, nama)
+    for barang, qty, jenis in zip(id_barang, jumlah, jenis_keluar):
+        qty = int(qty)
+
+        if qty <= 0:
+            flash("Jumlah harus lebih dari 0", "error")
+            return redirect(url_for("barang_keluar"))
+
+        sukses, pesan = tambah_barang_keluar(
+            int(barang),
+            int(qty),
+            tanggal,
+            jenis,
+            nama
+        )
+
+    if not sukses:
+        flash(pesan, "error")
+        return redirect(url_for("barang_keluar"))
     flash(pesan, "success" if sukses else "error")
     return redirect(url_for("barang_keluar"))
 
