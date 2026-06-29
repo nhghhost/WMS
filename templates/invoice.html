@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice - WMS BJS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f4f7fb;
+            color: #0f172a;
+            padding: 28px;
+        }
+
+        .container {
+            max-width: 1350px;
+            margin: auto;
+        }
+
+        .header {
+            background: white;
+            padding: 24px 28px;
+            border-radius: 22px;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .back-button {
+            text-decoration: none;
+            background: #0f172a;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-weight: 600;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .back-button:hover {
+            background: #1e293b;
+        }
+
+        .card {
+            background: white;
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            margin-bottom: 18px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .search-box:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+        }
+
+        thead {
+            background: #f1f5f9;
+        }
+
+        th,
+        td {
+            padding: 15px 14px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 15px;
+        }
+
+        th {
+            color: #475569;
+            font-weight: 700;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 11px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .aman {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .menipis {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .habis {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns:
+                1fr
+                /* tanggal */
+                2fr
+                /* nama barang */
+                2fr
+                /* perusahaan */
+                0.8fr
+                /* jumlah */
+                0.5fr
+                /* satuan */
+                1fr
+                /* harga */
+                auto;
+            /* tombol */
+            gap: 14px;
+            align-items: end;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #475569;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .submit-button {
+            border: none;
+            background: #2563eb;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            align-self: end;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .submit-button:hover {
+            background: #1d4ed8;
+        }
+
+        .status-button {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+
+            margin-bottom: 6px;
+        }
+
+        .note {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .empty-data {
+            text-align: center;
+            color: #64748b;
+            padding: 28px;
+        }
+
+        .alert-box {
+            padding: 14px 18px;
+            border-radius: 14px;
+            margin-bottom: 18px;
+            font-weight: 600;
+        }
+
+        .alert-box.success {
+            background: #dcfce7;
+            color: #166534;
+            border-left: 5px solid #22c55e;
+        }
+
+        .alert-box.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 5px solid #ef4444;
+        }
+
+        .currency {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        @media (max-width: 800px) {
+            body {
+                padding: 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                min-width: 750px;
+            }
+
+            .table-wrapper {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <div>
+                <h1>Invoice</h1>
+                <p>Daftar Invoice Barang.</p>
+            </div>
+
+            <a href="/" class="back-button">← Dashboard</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert-box {{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <h2 class="card-title">Tambah Invoice Baru</h2>
+
+            <form class="form-grid" action="/tambah-invoice" method="POST">
+                <div class="form-group">
+                    <label for="tanggal">Tanggal</label>
+                    <input type="date" id="tanggal" name="tanggal" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="namaBarang">Nama Barang</label>
+                    <input type="text" id="namaBarang" name="nama_barang" placeholder="Contoh: Lakban Coklat" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="asalPerusahaan">Dari Perusahaan</label>
+                    <input type="text" id="asalPerusahaan" name="asal_perusahaan" placeholder="Contoh: PT. HASH" min="0"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="jumlah">Jumlah Barang</label>
+                    <input type="number" id="jumlah" name="jumlah" placeholder="0" min="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="Satuan">Satuan</label>
+                    <select name="satuan" id="satuan">
+                        <option value="EA">EA</option>
+                        <option value="UNIT">UNIT</option>
+                        <option value="SHEET">SHEET</option>
+                        <option value="BOX">BOX</option>
+                        <option value="LUSIN">LUSIN</option>
+                        <option value="PAIL">PAIL</option>
+                        <option value="KG">KG</option>
+                        <option value="SPOOL">SPOOL</option>
+                        <option value="KARUNG">KARUNG</option>
+                        <option value="PACK">PACK</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="satuanBarang">Harga Barang (Rupiah)</label>
+                    <input type="number" id="hargaBarang" name="harga_barang">
+                </div>
+
+                <button type="submit" class="submit-button">Tambah</button>
+            </form>
+
+            <p class="note">
+                Data invoice tersimpan di database PostgreSQL server dan dapat diakses secara online.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Daftar Invoice</h2>
+
+            <input type="text" class="search-box" placeholder="Cari nama barang..." id="searchInput"
+                onkeyup="cariBarang()">
+
+            <div class="table-wrapper">
+                <table id="tabelBarang">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Tanggal</th>
+                            <th>Nama Barang</th>
+                            <th>Asal Perusahaan</th>
+                            <th>Jumlah Barang</th>
+                            <th>Harga Barang</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% if barang_list %}
+                        {% for invoice in barang_list %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ invoice["tanggal"] }}</td>
+                            <td>{{ invoice["nama_barang"] }}</td>
+                            <td class="stok">{{ invoice["asal_perusahaan"] }}</td>
+                            <td>{{ invoice["jumlah"]|format_jumlah }} {{ invoice["satuan"] }}</td>
+                            <td>{{ invoice["harga_barang"]|rupiah }}</td>
+                            <td>{{ invoice["total_harga"]|rupiah }}</td>
+                            <td>{{ invoice["status"]|status }}</td>
+                            <td>
+                                <form action="/ubah-invoice-pending/{{ invoice['id_invoice'] }}" method="POST"
+                                    onsubmit="return confirm('Yakin mau ubah status ini?')">
+                                    <button type="submit" class="status-button">INVOICE</button>
+                                </form>
+
+                                <form action="/ubah-invoice/{{ invoice['id_invoice'] }}" method="POST"
+                                    onsubmit="return confirm('Yakin mau ubah status ini?')">
+                                    <button type="submit" class="status-button">DONE</button>
+                                </form>
+
+                                <form action="/hapus-invoice/{{ invoice['id_invoice'] }}" method="POST"
+                                    onsubmit="return confirm('Yakin mau ubah barang ini?')">
+                                    <button type="submit" class="status-button">DELETE</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="empty-data">Belum ada data barang.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

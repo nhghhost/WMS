@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WMS BJS - Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        body {
+            min-height: 100vh;
+            background: #f4f7fb;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            background: linear-gradient(180deg, #0f172a, #1e293b);
+            color: white;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 24px 18px;
+        }
+
+        .sidebar .brand {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 36px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 15px;
+            border-radius: 14px;
+            color: #cbd5e1;
+            text-decoration: none;
+            margin-bottom: 8px;
+            transition: 0.2s;
+        }
+
+        .sidebar .menu-item:hover,
+        .sidebar .menu-item.active {
+            background: #334155;
+            color: white;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 28px;
+        }
+
+        .topbar {
+            background: white;
+            border-radius: 22px;
+            padding: 20px 24px;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+
+        .user-badge {
+            background: #eef2ff;
+            color: #3730a3;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .menu-card {
+            background: white;
+            border: none;
+            border-radius: 24px;
+            padding: 28px;
+            height: 190px;
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+            transition: 0.25s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 35px rgba(15, 23, 42, 0.12);
+        }
+
+        .menu-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            color: white;
+            margin-bottom: 18px;
+        }
+
+        .bg-in {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+
+        .bg-out {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .bg-stock {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+
+        .bg-invoice {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 22px;
+            padding: 22px;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
+            height: 100%;
+        }
+
+        .summary-number {
+            font-size: 30px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .summary-label {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .warning-box {
+            background: #fff7ed;
+            color: #9a3412;
+            border-left: 5px solid #f97316;
+            border-radius: 16px;
+            padding: 16px 18px;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                min-height: auto;
+                border-radius: 0 0 24px 24px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 18px;
+            }
+
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">
+            <i class="bi bi-box-seam-fill"></i>
+            WMS BJS
+        </div>
+
+        <a href="/" class="menu-item active">
+            <i class="bi bi-speedometer2"></i>
+            Dashboard
+        </a>
+
+        <a href="/barang-masuk" class="menu-item">
+            <i class="bi bi-box-arrow-in-down"></i>
+            Barang Masuk
+        </a>
+
+        <a href="/barang-keluar" class="menu-item">
+            <i class="bi bi-box-arrow-up"></i>
+            Barang Keluar
+        </a>
+
+        <a href="/stok-barang" class="menu-item">
+            <i class="bi bi-boxes"></i>
+            Stock Barang
+        </a>
+
+        <a href="/invoice" class="menu-item">
+            <i class="bi bi-receipt"></i>
+            Invoice
+        </a>
+
+        <a href="/laporan" class="menu-item">
+            <i class="bi bi-file-earmark-bar-graph"></i>
+            Laporan
+        </a>
+
+        <a href="/logout" class="menu-item mt-4">
+            <i class="bi bi-box-arrow-left"></i>
+            Logout
+        </a>
+    </aside>
+
+    <main class="main-content">
+
+        <div class="topbar">
+            <div>
+                <h3 class="mb-1 fw-bold">Dashboard Gudang</h3>
+                <p class="mb-0 text-muted">Pantau barang masuk, keluar, stok, dan invoice dari satu tempat.</p>
+            </div>
+
+            <div class="user-badge">
+                <i class="bi bi-person-circle me-1"></i>
+                Admin Gudang
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+
+            <div class="col-md-6 col-xl-3">
+                <a href="/barang-masuk" class="menu-card">
+                    <div class="menu-icon bg-in">
+                        <i class="bi bi-box-arrow-in-down"></i>
+                    </div>
+                    <h5 class="fw-bold">Barang Masuk</h5>
+                    <p class="text-muted mb-0">Input barang dari supplier atau hasil pembelian.</p>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <a href="/barang-keluar" class="menu-card">
+                    <div class="menu-icon bg-out">
+                        <i class="bi bi-box-arrow-up"></i>
+                    </div>
+                    <h5 class="fw-bold">Barang Keluar</h5>
+                    <p class="text-muted mb-0">Catat barang yang dikirim, dipakai, atau keluar gudang.</p>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <a href="/stok-barang" class="menu-card">
+                    <div class="menu-icon bg-stock">
+                        <i class="bi bi-boxes"></i>
+                    </div>
+                    <h5 class="fw-bold">Stock Barang</h5>
+                    <p class="text-muted mb-0">Lihat stok akhir dan barang yang hampir habis.</p>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <a href="/invoice" class="menu-card">
+                    <div class="menu-icon bg-invoice">
+                        <i class="bi bi-receipt-cutoff"></i>
+                    </div>
+                    <h5 class="fw-bold">Invoice</h5>
+                    <p class="text-muted mb-0">Buat dan cek invoice transaksi barang.</p>
+                </a>
+            </div>
+
+        </div>
+
+        <div class="row g-4 mb-4">
+
+            <div class="col-md-4">
+                <div class="summary-card">
+                    <p class="summary-label mb-1">Total Jenis Barang</p>
+                    <div class="summary-number">{{ total_jenis_barang }}</div>
+                    <small class="text-muted">Data master barang aktif</small>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="summary-card">
+                    <p class="summary-label mb-1">Barang Masuk Hari Ini</p>
+                    <div class="summary-number">{{ barang_masuk_hari_ini }}</div>
+                    <small class="text-muted">Total transaksi masuk</small>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="summary-card">
+                    <p class="summary-label mb-1">Barang Keluar Hari Ini</p>
+                    <div class="summary-number">{{ barang_keluar_hari_ini }}</div>
+                    <small class="text-muted">Total transaksi keluar</small>
+                </div>
+            </div>
+
+        </div>
+
+        {% if total_stok_bermasalah > 0 %}
+        <div class="warning-box">
+            <strong><i class="bi bi-exclamation-triangle-fill me-2"></i>Perhatian:</strong>
+            Ada <b>{{ total_stok_bermasalah }}</b> barang bermasalah:
+            <b>{{ total_stok_menipis }}</b> menipis dan
+            <b>{{ total_stok_habis }}</b> habis.
+            Cek menu <b>Stock Barang</b> untuk detail.
+        </div>
+        {% else %}
+        <div class="warning-box" style="background:#ecfdf5; color:#166534; border-left-color:#22c55e;">
+            <strong><i class="bi bi-check-circle-fill me-2"></i>Aman:</strong>
+            Tidak ada barang yang stoknya menipis atau habis.
+        </div>
+        {% endif %}
+
+    </main>
+
+</body>
+
+</html>
