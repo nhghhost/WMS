@@ -126,10 +126,12 @@
             color: #dc2626;
         }
 
-        .form-grid {
+        /* ── Header form (tanggal, nama) ── */
+        .form-header {
             display: grid;
-            grid-template-columns: 1fr 2fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 14px;
+            margin-bottom: 18px;
         }
 
         .form-group label {
@@ -156,8 +158,106 @@
             box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
         }
 
+        /* ── Tabel barang di dalam form ── */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 14px;
+        }
+
+        .items-table th {
+            background: #f1f5f9;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 13px;
+            color: #475569;
+            font-weight: 700;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .items-table td {
+            padding: 8px 6px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .items-table select,
+        .items-table input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .items-table select:focus,
+        .items-table input[type="number"]:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.10);
+        }
+
+        /* Pastikan dropdown TomSelect tampil di atas elemen lain, tidak terpotong */
+        .items-table td {
+            position: relative;
+            overflow: visible;
+        }
+
+        .items-table,
+        .card {
+            overflow: visible;
+        }
+
+        .ts-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .ts-wrapper.focus,
+        .ts-wrapper.dropdown-active {
+            z-index: 50;
+        }
+
+        .ts-dropdown {
+            z-index: 100;
+        }
+
+        .remove-row-btn {
+            background: none;
+            border: none;
+            color: #dc2626;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
+
+        .remove-row-btn:hover {
+            background: #fee2e2;
+        }
+
+        .add-row-btn {
+            border: 2px dashed #cbd5e1;
+            background: none;
+            color: #475569;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 18px;
+        }
+
+        .add-row-btn:hover {
+            border-color: #dc2626;
+            color: #dc2626;
+            background: #fff5f5;
+        }
+
         .button-area {
-            margin-top: 18px;
+            margin-top: 4px;
         }
 
         .submit-button {
@@ -226,7 +326,7 @@
                 align-items: flex-start;
             }
 
-            .form-grid {
+            .form-header {
                 grid-template-columns: 1fr;
             }
 
@@ -267,72 +367,59 @@
         <div class="card">
             <h2 class="card-title">Tambah Barang Keluar</h2>
 
-            <form class="form-grid" action="/tambah-barang-keluar" method="POST">
-
-                <!-- Tanggal -->
-                <div class="form-group">
-                    <label>Tanggal</label>
-                    <input type="datetime-local" name="tanggal" required>
-                </div>
-
-                <!-- Nama -->
-                <div class="form-group">
-                    <label>Nama</label>
-                    <input type="text" name="nama" placeholder="Masukkan Nama..." required>
-                </div>
-
-                <!-- Daftar Barang -->
-                <div class="form-group" style="grid-column:1/-1;">
-                    <label>Daftar Barang</label>
-
-                    <div id="barang-container">
-
-                        <div class="barang-item" style="display:grid;
-                       grid-template-columns:2fr 1fr 1fr auto;
-                       gap:10px;
-                       margin-bottom:10px;">
-
-                            <!-- Barang -->
-                            <select class="barang-select" name="id_barang" required>
-                                <option value="">Pilih Barang</option>
-
-                                {% for barang in barang_list %}
-                                <option value="{{ barang['id_barang'] }}">
-                                    {{ barang["nama_barang"] }} - Stok:
-                                    {{ barang["stok"] }} {{ barang["satuan"] }}
-                                </option>
-                                {% endfor %}
-                            </select>
-
-                            <!-- Jumlah -->
-                            <input type="number" name="jumlah" min="1" placeholder="Jumlah" required>
-
-                            <!-- Jenis -->
-                            <select name="jenis_keluar" required>
-                                <option value="">Jenis</option>
-                                <option value="sebagian">Sebagian</option>
-                                <option value="pinjam">Pinjam</option>
-                                <option value="habis">Habis</option>
-                            </select>
-
-                            <!-- Hapus -->
-                            <button type="button" class="hapus-barang" onclick="hapusBarang(this)"
-                                style="display:none;">
-                                ✕
-                            </button>
-
-                        </div>
-
+            <form id="formBarangKeluar">
+                <div class="form-header">
+                    <div class="form-group">
+                        <label for="tanggal">Tanggal</label>
+                        <input type="datetime-local" id="tanggal" name="tanggal" required>
                     </div>
 
-                    <button type="button" onclick="tambahBarang()" class="submit-button"
-                        style="margin-top:10px;background:#2563eb;">
-
-                        + Tambah Barang
-
-                    </button>
-
+                    <div class="form-group">
+                        <label for="nama">Nama</label>
+                        <input type="text" id="nama" name="nama" placeholder="Masukkan Nama......" required>
+                    </div>
                 </div>
+
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 36%;">Nama Barang</th>
+                            <th style="width: 20%;">Jumlah Keluar</th>
+                            <th style="width: 28%;">Jenis Keluar</th>
+                            <th style="width: 16%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemRows">
+                        <tr class="item-row">
+                            <td>
+                                <select name="id_barang[]" class="item-select" required>
+                                    <option value="">Pilih barang dari stok</option>
+                                    {% for barang in barang_list %}
+                                    <option value="{{ barang['id_barang'] }}">
+                                        {{ barang["nama_barang"] }} - Stok: {{ barang["stok"] }} {{ barang["satuan"] }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number" name="jumlah[]" placeholder="0" min="1" required>
+                            </td>
+                            <td>
+                                <select name="jenis_keluar[]" class="jenis-select" required>
+                                    <option value="">Pilih Jenis</option>
+                                    <option value="sebagian">Sebagian</option>
+                                    <option value="pinjam">Pinjam</option>
+                                    <option value="habis">Habis</option>
+                                </select>
+                            </td>
+                            <td>
+                                <button type="button" class="remove-row-btn" onclick="hapusBaris(this)">✕</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <button type="button" class="add-row-btn" onclick="tambahBaris()">+ Tambah Barang</button>
 
                 <div class="button-area">
                     <button type="submit" class="submit-button">
@@ -397,6 +484,8 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
     <script>
         function cariBarangKeluar() {
             let input = document.getElementById("searchInput").value.toLowerCase();
@@ -417,86 +506,109 @@
                 }
             }
         }
-    </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+        // ── Multi-barang: tambah / hapus baris ──
+        // Ambil HTML opsi dari baris pertama (sebelum di-enhance TomSelect)
+        const optionsBarangHTML = document.querySelector(".item-row .item-select").innerHTML;
+        const optionsJenisHTML = document.querySelector(".item-row .jenis-select").innerHTML;
 
-    <script>
-        function tambahBarang() {
+        function tambahBaris() {
+            let tbody = document.getElementById("itemRows");
 
-            const container = document.getElementById("barang-container");
+            let tr = document.createElement("tr");
+            tr.className = "item-row";
+            tr.innerHTML = `
+                <td>
+                    <select name="id_barang[]" class="item-select" required>${optionsBarangHTML}</select>
+                </td>
+                <td>
+                    <input type="number" name="jumlah[]" placeholder="0" min="1" required>
+                </td>
+                <td>
+                    <select name="jenis_keluar[]" class="jenis-select" required>${optionsJenisHTML}</select>
+                </td>
+                <td>
+                    <button type="button" class="remove-row-btn" onclick="hapusBaris(this)">✕</button>
+                </td>
+            `;
 
-            const div = document.createElement("div");
+            tbody.appendChild(tr);
 
-            div.className = "barang-item";
-
-            div.style.display = "grid";
-            div.style.gridTemplateColumns = "2fr 1fr 1fr auto";
-            div.style.gap = "10px";
-            div.style.marginBottom = "10px";
-
-            div.innerHTML = `
-        <select class="barang-select" name="id_barang" required>
-            <option value="">Pilih Barang</option>
-
-            {% for barang in barang_list %}
-            <option value="{{ barang['id_barang'] }}">
-                {{ barang["nama_barang"] }} - Stok:
-                {{ barang["stok"] }} {{ barang["satuan"] }}
-            </option>
-            {% endfor %}
-        </select>
-
-        <input
-            type="number"
-            name="jumlah"
-            min="1"
-            placeholder="Jumlah"
-            required>
-
-        <select name="jenis_keluar" required>
-            <option value="">Jenis</option>
-            <option value="sebagian">Sebagian</option>
-            <option value="pinjam">Pinjam</option>
-            <option value="habis">Habis</option>
-        </select>
-
-        <button
-            type="button"
-            class="hapus-barang"
-            onclick="hapusBarang(this)">
-            ✕
-        </button>
-    `;
-
-            container.appendChild(div);
-
-            new TomSelect(div.querySelector(".barang-select"), {
+            new TomSelect(tr.querySelector(".item-select"), {
                 create: false,
-                sortField: {
-                    field: "text",
-                    direction: "asc"
+                sortField: { field: "text", direction: "asc" }
+            });
+        }
+
+        function hapusBaris(btn) {
+            let tbody = document.getElementById("itemRows");
+            if (tbody.querySelectorAll(".item-row").length > 1) {
+                btn.closest("tr").remove();
+            }
+        }
+
+        // ── Submit: kirim satu request per barang, lalu reset form ──
+        const form = document.getElementById("formBarangKeluar");
+
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            let tanggal = document.getElementById("tanggal").value;
+            let nama = document.getElementById("nama").value;
+
+            let rows = document.querySelectorAll(".item-row");
+            let dataBarang = [];
+
+            rows.forEach(row => {
+                let idBarang = row.querySelector(".item-select").value;
+                let jumlah = row.querySelector("input[type='number']").value;
+                let jenisKeluar = row.querySelector(".jenis-select").value;
+
+                if (idBarang && jumlah && jenisKeluar) {
+                    dataBarang.push({ id_barang: idBarang, jumlah: jumlah, jenis_keluar: jenisKeluar });
                 }
             });
 
-        }
+            if (dataBarang.length === 0) {
+                alert("Lengkapi minimal satu baris barang (nama, jumlah, jenis keluar).");
+                return;
+            }
 
-        function hapusBarang(btn) {
+            // Kirim satu per satu ke endpoint backend yang sudah ada
+            for (let item of dataBarang) {
+                let fd = new FormData();
+                fd.append("tanggal", tanggal);
+                fd.append("nama", nama);
+                fd.append("id_barang", item.id_barang);
+                fd.append("jumlah", item.jumlah);
+                fd.append("jenis_keluar", item.jenis_keluar);
 
-            btn.parentElement.remove();
+                await fetch("/tambah-barang-keluar", {
+                    method: "POST",
+                    body: fd
+                });
+            }
 
-        }
+            // Simpan tanggal supaya tetap terisi setelah halaman reload
+            sessionStorage.setItem("tanggalTerakhir", tanggal);
 
-        document.querySelectorAll(".barang-select").forEach(el => {
+            location.reload();
+        });
 
-            new TomSelect(el, {
+        // Saat halaman dimuat, isi kembali tanggal terakhir (jika ada)
+        window.addEventListener("DOMContentLoaded", function () {
+            let tanggalTersimpan = sessionStorage.getItem("tanggalTerakhir");
+            if (tanggalTersimpan) {
+                document.getElementById("tanggal").value = tanggalTersimpan;
+            }
+        });
+
+        // Pasang TomSelect ke baris barang yang sudah ada saat halaman dimuat
+        document.querySelectorAll(".item-row .item-select").forEach(sel => {
+            new TomSelect(sel, {
                 create: false,
-                sortField: {
-                    field: "text",
-                    direction: "asc"
-                }
+                sortField: { field: "text", direction: "asc" }
             });
-
         });
     </script>
 
