@@ -1,5 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file
 from datetime import datetime
+from openpyxl import Workbook
+from io import BytesIO
 
 from Database import (
     init_database,
@@ -15,7 +17,11 @@ from Database import (
     hapus_barang_masuk,
     update_barang_masuk,
     ambil_barang_masuk_by_id,
-    hapus_barang_keluar
+    hapus_barang_keluar,
+    ambil_laporan_barang_masuk,
+    ambil_laporan_barang_keluar,
+    ambil_laporan_stok
+
 )
 
 app = Flask(__name__)
@@ -207,6 +213,72 @@ def tambah_barang_keluar_route():
 def hapus_barang_keluar_route(id_keluar):
     hapus_barang_keluar(id_keluar)
     return redirect(url_for("barang_keluar"))
+
+
+@app.route("/laporan")
+def laporan():
+    return render_template("laporan.html")
+
+@app.route("/buat-laporan", methods=["POST"])
+def buat_laporan_route():
+
+    tanggalAwal = request.form.get("tanggalAwal")
+    tanggalAkhir = request.form.get("tanggalAkhir")
+
+    data = ambil_laporan_stok(
+        tanggalAwal,
+        tanggalAkhir
+    )
+
+    wb = Workbook()
+
+    ws = wb.active
+    ws.title = "Laporan"
+
+    ws.append([
+        "No",
+        "Stok Awal",
+        "Nama Barang",
+        "Jumlah Masuk",
+        "Jumlah Keluar",
+        "Stok Akhir",
+        "Stok Aktual"
+    ])
+
+    for i, item in enumerate(data, start=1):
+
+        stok_awal = (
+            item["stok_aktual"]
+            - item["jumlah_masuk"]
+            + item["jumlah_keluar"]
+        )
+
+        stok_akhir = (
+            stok_awal
+            + item["jumlah_masuk"]
+            - item["jumlah_keluar"]
+        )
+
+        ws.append([
+            i,
+            stok_awal,
+            item["nama_barang"],
+            item["jumlah_masuk"],
+            item["jumlah_keluar"],
+            stok_akhir,
+            item["stok_aktual"]
+        ])
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=f"Laporan_{tanggalAwal}_{tanggalAkhir}.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 
 # Inisialisasi tabel saat startup

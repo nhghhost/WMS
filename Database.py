@@ -61,6 +61,7 @@ def init_database():
                 stok        INTEGER NOT NULL DEFAULT 0,
                 satuan      TEXT    NOT NULL,
                 stok_minimal INTEGER NOT NULL DEFAULT 20,
+                jenis_keluar VARCHAR(20) NOT NULL,
                 created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
@@ -99,6 +100,10 @@ def init_database():
         cursor.execute("""
             ALTER TABLE barang_masuk
             DROP COLUMN IF EXISTS nama_barang
+        """)
+        cursor.execute("""
+            ALTER TABLE barang
+            ADD COLUMN IF NOT EXISTS jenis_keluar VARCHAR(20)
         """)
 
         conn.commit()
@@ -200,6 +205,41 @@ def ambil_barang_stok_bermasalah():
         """)
         return cursor.fetchall()
 
+def ambil_laporan_stok(tanggal_awal, tanggal_akhir):
+    with get_db() as (_, cursor):
+        cursor.execute("""
+            SELECT
+                b.id_barang,
+                b.nama_barang,
+                b.stok AS stok_aktual,
+
+                COALESCE((
+                    SELECT SUM(bm.jumlah)
+                    FROM barang_masuk bm
+                    WHERE bm.id_barang = b.id_barang
+                    AND DATE(bm.tanggal)
+                        BETWEEN %s AND %s
+                ), 0) AS jumlah_masuk,
+
+                COALESCE((
+                    SELECT SUM(bk.jumlah)
+                    FROM barang_keluar bk
+                    WHERE bk.id_barang = b.id_barang
+                    AND bk.jenis_keluar = 'habis'
+                    AND DATE(bk.tanggal)
+                        BETWEEN %s AND %s
+                ), 0) AS jumlah_keluar
+
+            FROM barang b
+            ORDER BY b.nama_barang
+        """, (
+            tanggal_awal,
+            tanggal_akhir,
+            tanggal_awal,
+            tanggal_akhir
+        ))
+
+        return cursor.fetchall()
 
 # ---------------------------------------------------------------------------
 # Barang Masuk
@@ -349,6 +389,45 @@ def hapus_barang_keluar(id_keluar):
             """, (data["jumlah"], data["id_barang"]))
             cursor.execute("DELETE FROM barang_keluar WHERE id_keluar = %s", (id_keluar,))
             conn.commit()
+
+
+# -----------------------------------------------
+# buat laporan
+
+def ambil_laporan_barang_masuk(tanggal_awal, tanggal_akhir):
+    with get_db() as (_, cursor):
+        cursor.execute("""
+            SELECT
+                bm.tanggal,
+                b.nama_barang,
+                bm.jumlah,
+                b.satuan
+            FROM barang_masuk bm
+            JOIN barang b ON bm.id_barang = b.id_barang
+            WHERE DATE(bm.tanggal) BETWEEN %s AND %s
+            ORDER BY bm.tanggal ASC
+        """, (tanggal_awal, tanggal_akhir))
+
+        return cursor.fetchall()
+    
+def ambil_laporan_barang_keluar(tanggal_awal, tanggal_akhir):
+    with get_db() as (_, cursor):
+        cursor.execute("""
+            SELECT
+                bk.tanggal,
+                b.nama_barang,
+                bk.jumlah,
+                b.satuan,
+                bk.nama,
+                bk.jenis_keluar
+            FROM barang_keluar bk
+            JOIN barang b
+                ON bk.id_barang = b.id_barang
+            WHERE DATE(bk.tanggal) BETWEEN %s AND %s AND bk.jenis_keluar = 'habis'
+            ORDER BY bk.tanggal ASC
+        """, (tanggal_awal, tanggal_akhir))
+
+        return cursor.fetchall()
 
 
 # ---------------------------------------------------------------------------
