@@ -10,7 +10,7 @@ from Database import (
     hapus_barang,
     tambah_barang_masuk,
     ambil_semua_barang_masuk,
-    ambil_data_dashboard,          # <- ganti 6 fungsi hitung dengan 1 query
+    ambil_data_dashboard,
     ambil_barang_stok_bermasalah,
     tambah_barang_keluar,
     ambil_semua_barang_keluar,
@@ -20,8 +20,8 @@ from Database import (
     hapus_barang_keluar,
     ambil_laporan_barang_masuk,
     ambil_laporan_barang_keluar,
-    ambil_laporan_stok
-
+    ambil_laporan_stok,
+    update_jenis_keluar_default,
 )
 
 app = Flask(__name__)
@@ -30,9 +30,8 @@ app.secret_key = "vjs_wms_secret_key"
 
 @app.route("/")
 def dashboard():
-    stats = ambil_data_dashboard()          # 1 query, bukan 6
+    stats = ambil_data_dashboard()
     barang_bermasalah = ambil_barang_stok_bermasalah()
-
     total_stok_bermasalah = stats["total_stok_menipis"] + stats["total_stok_habis"]
 
     return render_template(
@@ -79,6 +78,19 @@ def tambah_barang_route():
 @app.route("/hapus-barang/<int:id_barang>", methods=["POST"])
 def hapus_barang_route(id_barang):
     hapus_barang(id_barang)
+    return redirect(url_for("stok_barang"))
+
+
+@app.route("/set-jenis-keluar-default/<int:id_barang>", methods=["POST"])
+def set_jenis_keluar_default_route(id_barang):
+    """Set jenis keluar default untuk satu barang dari halaman stok."""
+    jenis = request.form.get("jenis_keluar")
+    if jenis not in ("habis", "pinjam", "sebagian", ""):
+        flash("Jenis keluar tidak valid", "error")
+        return redirect(url_for("stok_barang"))
+
+    update_jenis_keluar_default(id_barang, jenis if jenis else None)
+    flash("Jenis keluar default berhasil diubah", "success")
     return redirect(url_for("stok_barang"))
 
 
@@ -186,6 +198,7 @@ def tambah_barang_keluar_route():
         return redirect(url_for("barang_keluar"))
 
     nama = nama.strip()
+    sukses, pesan = True, ""
 
     for barang, qty, jenis in zip(id_barang, jumlah, jenis_keluar):
         qty = int(qty)
@@ -194,18 +207,13 @@ def tambah_barang_keluar_route():
             flash("Jumlah harus lebih dari 0", "error")
             return redirect(url_for("barang_keluar"))
 
-        sukses, pesan = tambah_barang_keluar(
-            int(barang),
-            int(qty),
-            tanggal,
-            jenis,
-            nama
-        )
+        sukses, pesan = tambah_barang_keluar(int(barang), qty, tanggal, jenis, nama)
 
-    if not sukses:
-        flash(pesan, "error")
-        return redirect(url_for("barang_keluar"))
-    flash(pesan, "success" if sukses else "error")
+        if not sukses:
+            flash(pesan, "error")
+            return redirect(url_for("barang_keluar"))
+
+    flash(pesan, "success")
     return redirect(url_for("barang_keluar"))
 
 
@@ -219,55 +227,23 @@ def hapus_barang_keluar_route(id_keluar):
 def laporan():
     return render_template("laporan.html")
 
+
 @app.route("/buat-laporan", methods=["POST"])
 def buat_laporan_route():
-
     tanggalAwal = request.form.get("tanggalAwal")
     tanggalAkhir = request.form.get("tanggalAkhir")
 
-    data = ambil_laporan_stok(
-        tanggalAwal,
-        tanggalAkhir
-    )
+    data = ambil_laporan_stok(tanggalAwal, tanggalAkhir)
 
     wb = Workbook()
-
     ws = wb.active
     ws.title = "Laporan"
-
-    ws.append([
-        "No",
-        "Stok Awal",
-        "Nama Barang",
-        "Jumlah Masuk",
-        "Jumlah Keluar",
-        "Stok Akhir",
-        "Stok Aktual"
-    ])
+    ws.append(["No", "Stok Awal", "Nama Barang", "Jumlah Masuk", "Jumlah Keluar", "Stok Akhir", "Stok Aktual"])
 
     for i, item in enumerate(data, start=1):
-
-        stok_awal = (
-            item["stok_aktual"]
-            - item["jumlah_masuk"]
-            + item["jumlah_keluar"]
-        )
-
-        stok_akhir = (
-            stok_awal
-            + item["jumlah_masuk"]
-            - item["jumlah_keluar"]
-        )
-
-        ws.append([
-            i,
-            stok_awal,
-            item["nama_barang"],
-            item["jumlah_masuk"],
-            item["jumlah_keluar"],
-            stok_akhir,
-            item["stok_aktual"]
-        ])
+        stok_awal = item["stok_aktual"] - item["jumlah_masuk"] + item["jumlah_keluar"]
+        stok_akhir = stok_awal + item["jumlah_masuk"] - item["jumlah_keluar"]
+        ws.append([i, stok_awal, item["nama_barang"], item["jumlah_masuk"], item["jumlah_keluar"], stok_akhir, item["stok_aktual"]])
 
     output = BytesIO()
     wb.save(output)
@@ -281,7 +257,6 @@ def buat_laporan_route():
     )
 
 
-# Inisialisasi tabel saat startup
 init_database()
 
 if __name__ == "__main__":

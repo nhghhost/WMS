@@ -395,14 +395,15 @@
                                 <select name="id_barang[]" class="item-select" required>
                                     <option value="">Pilih barang dari stok</option>
                                     {% for barang in barang_list %}
-                                    <option value="{{ barang['id_barang'] }}">
+                                    <option value="{{ barang['id_barang'] }}"
+                                        data-jenis="{{ barang['jenis_keluar'] or '' }}">
                                         {{ barang["nama_barang"] }} - Stok: {{ barang["stok"] }} {{ barang["satuan"] }}
                                     </option>
                                     {% endfor %}
                                 </select>
                             </td>
                             <td>
-                                <input type="number" name="jumlah[]" placeholder="0" min="1" required>
+                                <input type="number" name="jumlah[]" placeholder="0" min="1" value="1" required>
                             </td>
                             <td>
                                 <select name="jenis_keluar[]" class="jenis-select" required>
@@ -508,9 +509,32 @@
         }
 
         // ── Multi-barang: tambah / hapus baris ──
-        // Ambil HTML opsi dari baris pertama (sebelum di-enhance TomSelect)
         const optionsBarangHTML = document.querySelector(".item-row .item-select").innerHTML;
         const optionsJenisHTML = document.querySelector(".item-row .jenis-select").innerHTML;
+
+        // Auto-fill jenis keluar berdasarkan data-jenis di option barang yang dipilih
+        function autoFillJenis(selectBarang) {
+            const row = selectBarang.closest(".item-row");
+            const jenisSelect = row.querySelector(".jenis-select");
+
+            const option = selectBarang.options[selectBarang.selectedIndex];
+
+            if (!option) {
+                jenisSelect.value = "";
+                return;
+            }
+
+            const jenis = option.dataset.jenis || "";
+
+            jenisSelect.value = jenis;
+        }
+
+        function pasangEventBarang(selectEl) {
+            // TomSelect fire event "change" ke native select
+            selectEl.addEventListener("change", function () {
+                autoFillJenis(this);
+            });
+        }
 
         function tambahBaris() {
             let tbody = document.getElementById("itemRows");
@@ -522,7 +546,7 @@
                     <select name="id_barang[]" class="item-select" required>${optionsBarangHTML}</select>
                 </td>
                 <td>
-                    <input type="number" name="jumlah[]" placeholder="0" min="1" required>
+                    <input type="number" name="jumlah[]" placeholder="0" min="1" value="1" required>
                 </td>
                 <td>
                     <select name="jenis_keluar[]" class="jenis-select" required>${optionsJenisHTML}</select>
@@ -534,9 +558,15 @@
 
             tbody.appendChild(tr);
 
-            new TomSelect(tr.querySelector(".item-select"), {
+            let nativeSelect = tr.querySelector(".item-select");
+            pasangEventBarang(nativeSelect);
+
+            new TomSelect(nativeSelect, {
                 create: false,
-                sortField: { field: "text", direction: "asc" }
+                sortField: { field: "text", direction: "asc" },
+                onChange: function () {
+                    autoFillJenis(nativeSelect);
+                }
             });
         }
 
@@ -603,11 +633,14 @@
             }
         });
 
-        // Pasang TomSelect ke baris barang yang sudah ada saat halaman dimuat
+        // Pasang TomSelect + auto-fill ke baris yang sudah ada saat halaman dimuat
         document.querySelectorAll(".item-row .item-select").forEach(sel => {
             new TomSelect(sel, {
                 create: false,
-                sortField: { field: "text", direction: "asc" }
+                sortField: { field: "text", direction: "asc" },
+                onChange: function () {
+                    autoFillJenis(sel);
+                }
             });
         });
     </script>

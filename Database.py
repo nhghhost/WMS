@@ -10,7 +10,6 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 
 def init_connection_pool():
-    """Inisialisasi connection pool — wajib dipanggil sekali saat startup."""
     global connection_pool
     if DATABASE_URL:
         connection_pool = pool.SimpleConnectionPool(
@@ -30,15 +29,6 @@ def init_connection_pool():
 
 @contextmanager
 def get_db():
-    """
-    Context manager untuk koneksi database.
-    Otomatis kembalikan koneksi ke pool meski ada exception.
-    
-    Penggunaan:
-        with get_db() as (conn, cursor):
-            cursor.execute(...)
-            conn.commit()
-    """
     conn = connection_pool.getconn()
     cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     try:
@@ -52,17 +42,16 @@ def get_db():
 
 
 def init_database():
-    """Buat tabel jika belum ada. ALTER TABLE dijalankan sekali saja."""
     with get_db() as (conn, cursor):
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS barang (
-                id_barang   SERIAL PRIMARY KEY,
-                nama_barang TEXT    NOT NULL UNIQUE,
-                stok        INTEGER NOT NULL DEFAULT 0,
-                satuan      TEXT    NOT NULL,
+                id_barang    SERIAL PRIMARY KEY,
+                nama_barang  TEXT    NOT NULL UNIQUE,
+                stok         INTEGER NOT NULL DEFAULT 0,
+                satuan       TEXT    NOT NULL,
+                jenis_keluar VARCHAR(20),
                 stok_minimal INTEGER NOT NULL DEFAULT 20,
-                jenis_keluar VARCHAR(20) NOT NULL,
-                created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
 
@@ -88,19 +77,12 @@ def init_database():
             )
         """)
 
-        # Migrasi — hanya jalan jika kolom belum ada (idempotent)
-        cursor.execute("""
-            ALTER TABLE barang_keluar
-            ADD COLUMN IF NOT EXISTS nama VARCHAR(50)
-        """)
-        cursor.execute("""
-            ALTER TABLE barang_keluar
-            ADD COLUMN IF NOT EXISTS jenis_keluar VARCHAR(20)
-        """)
-        cursor.execute("""
-            ALTER TABLE barang_masuk
-            DROP COLUMN IF EXISTS nama_barang
-        """)
+        # Migrasi idempotent
+        cursor.execute("ALTER TABLE barang_keluar ADD COLUMN IF NOT EXISTS nama VARCHAR(50)")
+        cursor.execute("ALTER TABLE barang_keluar ADD COLUMN IF NOT EXISTS jenis_keluar VARCHAR(20)")
+        cursor.execute("ALTER TABLE barang_masuk DROP COLUMN IF EXISTS nama_barang")
+
+        # Kolom baru: jenis keluar default per barang
         cursor.execute("""
             ALTER TABLE barang
             ADD COLUMN IF NOT EXISTS jenis_keluar VARCHAR(20)
@@ -144,7 +126,8 @@ def tambah_barang(nama_barang, stok, satuan, stok_minimal=5):
 def ambil_semua_barang():
     with get_db() as (_, cursor):
         cursor.execute("""
-            SELECT id_barang, nama_barang, stok, satuan, stok_minimal
+            SELECT id_barang, nama_barang, stok, satuan, stok_minimal,
+                   jenis_keluar
             FROM barang
             ORDER BY nama_barang ASC
         """)
@@ -157,24 +140,26 @@ def hapus_barang(id_barang):
         conn.commit()
 
 
+def update_jenis_keluar_default(id_barang, jenis_keluar):
+    """Update jenis keluar default untuk satu barang."""
+    with get_db() as (conn, cursor):
+        cursor.execute("""
+            UPDATE barang
+            SET jenis_keluar = %s
+            WHERE id_barang = %s
+        """, (jenis_keluar or None, id_barang))
+        conn.commit()
+
+
 # ---------------------------------------------------------------------------
-# Dashboard — satu query gabungan, jauh lebih cepat dari 6 query terpisah
+# Dashboard
 # ---------------------------------------------------------------------------
 
 def ambil_data_dashboard():
-    """
-    Kembalikan semua statistik dashboard dalam satu round-trip ke database:
-      - total_jenis_barang
-      - barang_masuk_hari_ini
-      - barang_keluar_hari_ini
-      - total_stok_menipis
-      - total_stok_habis
-    """
     with get_db() as (_, cursor):
         cursor.execute("""
             SELECT
-                (SELECT COUNT(*)
-                 FROM barang) AS total_jenis_barang,
+                (SELECT COUNT(*) FROM barang) AS total_jenis_barang,
 
                 (SELECT COALESCE(SUM(jumlah), 0)
                  FROM barang_masuk
@@ -205,6 +190,7 @@ def ambil_barang_stok_bermasalah():
         """)
         return cursor.fetchall()
 
+
 def ambil_laporan_stok(tanggal_awal, tanggal_akhir):
     with get_db() as (_, cursor):
         cursor.execute("""
@@ -217,48 +203,36 @@ def ambil_laporan_stok(tanggal_awal, tanggal_akhir):
                     SELECT SUM(bm.jumlah)
                     FROM barang_masuk bm
                     WHERE bm.id_barang = b.id_barang
-                    AND DATE(bm.tanggal)
-                        BETWEEN %s AND %s
+                      AND DATE(bm.tanggal) BETWEEN %s AND %s
                 ), 0) AS jumlah_masuk,
 
                 COALESCE((
                     SELECT SUM(bk.jumlah)
                     FROM barang_keluar bk
                     WHERE bk.id_barang = b.id_barang
-                    AND bk.jenis_keluar = 'habis'
-                    AND DATE(bk.tanggal)
-                        BETWEEN %s AND %s
+                      AND bk.jenis_keluar = 'habis'
+                      AND DATE(bk.tanggal) BETWEEN %s AND %s
                 ), 0) AS jumlah_keluar
 
             FROM barang b
             ORDER BY b.nama_barang
-        """, (
-            tanggal_awal,
-            tanggal_akhir,
-            tanggal_awal,
-            tanggal_akhir
-        ))
-
+        """, (tanggal_awal, tanggal_akhir, tanggal_awal, tanggal_akhir))
         return cursor.fetchall()
+
 
 # ---------------------------------------------------------------------------
 # Barang Masuk
 # ---------------------------------------------------------------------------
 
 def tambah_barang_masuk(id_barang, jumlah, tanggal):
-    """BUG FIX: versi lama tidak melakukan INSERT sama sekali."""
     with get_db() as (conn, cursor):
         cursor.execute("""
             INSERT INTO barang_masuk (id_barang, jumlah, tanggal)
             VALUES (%s, %s, %s)
         """, (id_barang, jumlah, tanggal))
-
         cursor.execute("""
-            UPDATE barang
-            SET stok = stok + %s
-            WHERE id_barang = %s
+            UPDATE barang SET stok = stok + %s WHERE id_barang = %s
         """, (jumlah, id_barang))
-
         conn.commit()
 
 
@@ -296,17 +270,12 @@ def update_barang_masuk(id_masuk, jumlah_baru, tanggal_baru):
             id_barang   = data_lama["id_barang"]
             jumlah_lama = data_lama["jumlah"]
 
-            # Rollback stok lama, terapkan stok baru
             cursor.execute("""
-                UPDATE barang
-                SET stok = stok - %s + %s
-                WHERE id_barang = %s
+                UPDATE barang SET stok = stok - %s + %s WHERE id_barang = %s
             """, (jumlah_lama, jumlah_baru, id_barang))
 
             cursor.execute("""
-                UPDATE barang_masuk
-                SET jumlah = %s, tanggal = %s
-                WHERE id_masuk = %s
+                UPDATE barang_masuk SET jumlah = %s, tanggal = %s WHERE id_masuk = %s
             """, (jumlah_baru, tanggal_baru, id_masuk))
 
             conn.commit()
@@ -350,7 +319,6 @@ def tambah_barang_keluar(id_barang, jumlah, tanggal, jenis_keluar, nama):
             VALUES (%s, %s, %s, %s, %s)
         """, (id_barang, jumlah, tanggal, jenis_keluar, nama))
 
-        # "sebagian" tidak mengurangi stok; "habis" dan "pinjam" mengurangi
         if jenis_keluar in ("habis", "pinjam"):
             cursor.execute("""
                 UPDATE barang SET stok = stok - %s WHERE id_barang = %s
@@ -391,47 +359,37 @@ def hapus_barang_keluar(id_keluar):
             conn.commit()
 
 
-# -----------------------------------------------
-# buat laporan
+# ---------------------------------------------------------------------------
+# Laporan
+# ---------------------------------------------------------------------------
 
 def ambil_laporan_barang_masuk(tanggal_awal, tanggal_akhir):
     with get_db() as (_, cursor):
         cursor.execute("""
-            SELECT
-                bm.tanggal,
-                b.nama_barang,
-                bm.jumlah,
-                b.satuan
+            SELECT bm.tanggal, b.nama_barang, bm.jumlah, b.satuan
             FROM barang_masuk bm
             JOIN barang b ON bm.id_barang = b.id_barang
             WHERE DATE(bm.tanggal) BETWEEN %s AND %s
             ORDER BY bm.tanggal ASC
         """, (tanggal_awal, tanggal_akhir))
-
         return cursor.fetchall()
-    
+
+
 def ambil_laporan_barang_keluar(tanggal_awal, tanggal_akhir):
     with get_db() as (_, cursor):
         cursor.execute("""
-            SELECT
-                bk.tanggal,
-                b.nama_barang,
-                bk.jumlah,
-                b.satuan,
-                bk.nama,
-                bk.jenis_keluar
+            SELECT bk.tanggal, b.nama_barang, bk.jumlah, b.satuan, bk.nama, bk.jenis_keluar
             FROM barang_keluar bk
-            JOIN barang b
-                ON bk.id_barang = b.id_barang
-            WHERE DATE(bk.tanggal) BETWEEN %s AND %s AND bk.jenis_keluar = 'habis'
+            JOIN barang b ON bk.id_barang = b.id_barang
+            WHERE DATE(bk.tanggal) BETWEEN %s AND %s
+              AND bk.jenis_keluar = 'habis'
             ORDER BY bk.tanggal ASC
         """, (tanggal_awal, tanggal_akhir))
-
         return cursor.fetchall()
 
 
 # ---------------------------------------------------------------------------
-# Fungsi hitung individual — tetap ada agar kompatibel jika dipakai di tempat lain
+# Fungsi hitung individual (kompatibilitas)
 # ---------------------------------------------------------------------------
 
 def hitung_total_jenis_barang():
