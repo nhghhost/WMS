@@ -190,7 +190,6 @@ def ambil_barang_stok_bermasalah():
         """)
         return cursor.fetchall()
 
-
 def ambil_laporan_stok(tanggal_awal, tanggal_akhir):
     with get_db() as (_, cursor):
         cursor.execute("""
