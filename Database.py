@@ -428,7 +428,3 @@ def hitung_stok_habis():
     with get_db() as (_, cursor):
         cursor.execute("SELECT COUNT(*) AS total FROM barang WHERE stok = 0")
         return cursor.fetchone()["total"]
-
-
-# Panggil init pool saat modul diimpor
-init_connection_pool()
