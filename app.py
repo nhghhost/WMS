@@ -22,11 +22,17 @@ from Database import (
     ambil_laporan_barang_keluar,
     ambil_laporan_stok,
     update_jenis_keluar_default,
+    init_database
 )
 
 app = Flask(__name__)
 app.secret_key = "vjs_wms_secret_key"
 
+# Panggil pembutan tabel
+try:
+    init_database()
+except Exception as e:
+    print(f"Database init warning: {e}")
 
 @app.route("/")
 def dashboard():
