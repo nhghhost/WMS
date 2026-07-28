@@ -295,7 +295,7 @@
         <div class="card">
             <h2 class="card-title">Tambah Barang Baru</h2>
 
-            <form class="form-grid" action="/tambah-barang" method="POST">
+            <form class="form-grid" action="/tambah-barang" method="POST" id="formTambahBarang">
                 <div class="form-group">
                     <label for="namaBarang">Nama Barang</label>
                     <input type="text" id="namaBarang" name="nama_barang" placeholder="Contoh: Lakban Coklat" required>
@@ -404,6 +404,32 @@
                 }
             }
         }
+
+        // ==== Simpan Stock Awal & Satuan terakhir, Nama Barang tetap kosong ====
+        const stokInput = document.getElementById("stokBarang");
+        const satuanSelect = document.getElementById("satuanBarang");
+
+        // Saat halaman dimuat, isi ulang Stock Awal & Satuan dari nilai terakhir
+        window.addEventListener("DOMContentLoaded", () => {
+            const lastStok = localStorage.getItem("lastStokAwal");
+            const lastSatuan = localStorage.getItem("lastSatuan");
+
+            if (lastStok !== null) {
+                stokInput.value = lastStok;
+            }
+            if (lastSatuan !== null) {
+                satuanSelect.value = lastSatuan;
+            }
+
+            // Fokus otomatis ke Nama Barang biar langsung bisa ketik barang berikutnya
+            document.getElementById("namaBarang").focus();
+        });
+
+        // Simpan nilai terbaru tiap kali form akan dikirim
+        document.getElementById("formTambahBarang").addEventListener("submit", () => {
+            localStorage.setItem("lastStokAwal", stokInput.value);
+            localStorage.setItem("lastSatuan", satuanSelect.value);
+        });
     </script>
 
 </body>
