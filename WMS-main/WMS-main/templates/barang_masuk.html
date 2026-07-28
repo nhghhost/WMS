@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <title>Barang Masuk - WMS BJS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f4f7fb;
+            color: #0f172a;
+            padding: 28px;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: auto;
+        }
+
+        .header {
+            background: white;
+            padding: 24px 28px;
+            border-radius: 22px;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .back-button {
+            text-decoration: none;
+            background: #0f172a;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-weight: 600;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .back-button:hover {
+            background: #1e293b;
+        }
+
+        .card {
+            background: white;
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            margin-bottom: 18px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .search-box:focus {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+        }
+
+        thead {
+            background: #f1f5f9;
+        }
+
+        th,
+        td {
+            padding: 15px 14px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 15px;
+        }
+
+        th {
+            color: #475569;
+            font-weight: 700;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .jumlah {
+            font-weight: 800;
+            font-size: 16px;
+            color: #16a34a;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #475569;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+        }
+
+        .button-area {
+            margin-top: 18px;
+        }
+
+        .submit-button {
+            border: none;
+            background: #16a34a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .submit-button:hover {
+            background: #15803d;
+        }
+
+        .note {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .empty-data {
+            text-align: center;
+            color: #64748b;
+            padding: 28px;
+        }
+
+        .edit-btn {
+            background: #2563eb;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .delete-btn {
+            background: #2563eb;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        @media (max-width: 800px) {
+            body {
+                padding: 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                min-width: 750px;
+            }
+
+            .table-wrapper {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <div>
+                <h1>Barang Masuk</h1>
+                <p>Catat barang yang masuk ke gudang. Stok akan otomatis bertambah.</p>
+            </div>
+
+            <a href="/" class="back-button">← Dashboard</a>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Tambah Barang Masuk</h2>
+
+            <form class="form-grid" action="/tambah-barang-masuk" method="POST">
+                <div class="form-group">
+                    <label for="tanggal">Tanggal</label>
+                    <input type="date" id="tanggal" name="tanggal" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="idBarang">Nama Barang</label>
+                    <select id="idBarang" name="id_barang" required>
+                        <option value="">Pilih barang dari stok</option>
+
+                        {% for barang in barang_list %}
+                        <option value="{{ barang['id_barang'] }}">
+                            {{ barang["nama_barang"] }} - Stok: {{ barang["stok"] }} {{ barang["satuan"] }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="jumlah">Jumlah Masuk</label>
+                    <input type="number" id="jumlah" name="jumlah" placeholder="0" min="1" required>
+                </div>
+
+                <div class="button-area">
+                    <button type="submit" class="submit-button">
+                        Tambah
+                    </button>
+                </div>
+            </form>
+
+            <p class="note">
+                Nama barang diambil dari menu Stock Barang. Kalau barang belum ada, tambahkan dulu di halaman Stock
+                Barang.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Riwayat Barang Masuk</h2>
+
+            <input type="text" class="search-box" placeholder="Cari nama barang..." id="searchInput"
+                onkeyup="cariBarangMasuk()">
+
+            <div class="table-wrapper">
+                <table id="tabelBarangMasuk">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Tanggal & Jam</th>
+                            <th>Nama Barang</th>
+                            <th>Jumlah Masuk</th>
+                            <th>Satuan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% if barang_masuk_list %}
+                        {% for item in barang_masuk_list %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ item["tanggal"] }}</td>
+                            <td>{{ item["nama_barang"] }}</td>
+                            <td class="jumlah">+{{ item["jumlah"] }}</td>
+                            <td>{{ item["satuan"] }}</td>
+                            <td><a href="/edit-barang-masuk/{{ item['id_masuk'] }}" class="edit-btn">Edit</a>
+
+                                <a href="/hapus-barang-masuk/{{ item['id_masuk'] }}" class="delete-btn"
+                                    onclick="return confirm('Yakin hapus data?')">Hapus</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="empty-data">Belum ada data barang masuk.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <script>
+            function cariBarangMasuk() {
+                let input = document.getElementById("searchInput").value.toLowerCase();
+                let table = document.getElementById("tabelBarangMasuk");
+                let rows = table.getElementsByTagName("tr");
+
+                for (let i = 1; i < rows.length; i++) {
+                    let namaBarang = rows[i].getElementsByTagName("td")[2];
+
+                    if (namaBarang) {
+                        let textValue = namaBarang.textContent || namaBarang.innerText;
+
+                        if (textValue.toLowerCase().indexOf(input) > -1) {
+                            rows[i].style.display = "";
+                        } else {
+                            rows[i].style.display = "none";
+                        }
+                    }
+                }
+            }
+        </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+        <script>
+            new TomSelect("#idBarang", {
+                create: false,
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                }
+            });
+        </script>
+
+</body>
+
+</html>

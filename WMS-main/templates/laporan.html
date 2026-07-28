@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+    <title>Laporan - WMS BJS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f4f7fb;
+            color: #0f172a;
+            padding: 28px;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: auto;
+        }
+
+        .header {
+            background: white;
+            padding: 24px 28px;
+            border-radius: 22px;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .back-button {
+            text-decoration: none;
+            background: #0f172a;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-weight: 600;
+            transition: 0.2s;
+            white-space: nowrap;
+        }
+
+        .back-button:hover {
+            background: #1e293b;
+        }
+
+        .card {
+            background: white;
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.06);
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            margin-bottom: 18px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .search-box:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+        }
+
+        thead {
+            background: #f1f5f9;
+        }
+
+        th,
+        td {
+            padding: 15px 14px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 15px;
+        }
+
+        th {
+            color: #475569;
+            font-weight: 700;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .jumlah {
+            font-weight: 800;
+            font-size: 16px;
+            color: #dc2626;
+        }
+
+        /* ── Header form (tanggal, nama) ── */
+        .form-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #475569;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+        }
+
+        /* ── Tabel barang di dalam form ── */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 14px;
+        }
+
+        .items-table th {
+            background: #f1f5f9;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 13px;
+            color: #475569;
+            font-weight: 700;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .items-table td {
+            padding: 8px 6px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .items-table select,
+        .items-table input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .items-table select:focus,
+        .items-table input[type="number"]:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.10);
+        }
+
+        /* Pastikan dropdown TomSelect tampil di atas elemen lain, tidak terpotong */
+        .items-table td {
+            position: relative;
+            overflow: visible;
+        }
+
+        .items-table,
+        .card {
+            overflow: visible;
+        }
+
+        .ts-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        .ts-wrapper.focus,
+        .ts-wrapper.dropdown-active {
+            z-index: 50;
+        }
+
+        .ts-dropdown {
+            z-index: 100;
+        }
+
+        .remove-row-btn {
+            background: none;
+            border: none;
+            color: #dc2626;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
+
+        .remove-row-btn:hover {
+            background: #fee2e2;
+        }
+
+        .add-row-btn {
+            border: 2px dashed #cbd5e1;
+            background: none;
+            color: #475569;
+            padding: 10px 18px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 18px;
+        }
+
+        .add-row-btn:hover {
+            border-color: #dc2626;
+            color: #dc2626;
+            background: #fff5f5;
+        }
+
+        .button-area {
+            margin-top: 4px;
+        }
+
+        .submit-button {
+            border: none;
+            background: #dc2626;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .submit-button:hover {
+            background: #b91c1c;
+        }
+
+        .note {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .empty-data {
+            text-align: center;
+            color: #64748b;
+            padding: 28px;
+        }
+
+        .alert-box {
+            padding: 14px 18px;
+            border-radius: 14px;
+            margin-bottom: 18px;
+            font-weight: 600;
+        }
+
+        .alert-box.success {
+            background: #dcfce7;
+            color: #166534;
+            border-left: 5px solid #22c55e;
+        }
+
+        .alert-box.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 5px solid #ef4444;
+        }
+
+        .delete-btn {
+            background: #2563eb;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        @media (max-width: 800px) {
+            body {
+                padding: 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .form-header {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                min-width: 750px;
+            }
+
+            .table-wrapper {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <div>
+                <h1>Laporan</h1>
+                <p>Laporan barang keluar dan barang masuk.</p>
+            </div>
+
+            <a href="/" class="back-button">← Dashboard</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert-box {{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <h2 class="card-title">Tambah Barang Keluar</h2>
+
+            <form id="formBuatLaporan" action="/buat-laporan" method="POST">
+                <div class="form-header">
+                    <div class="form-group">
+                        <label for="tanggal">Dari Tanggal</label>
+                        <input type="date" id="tanggalAwal" name="tanggalAwal" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tanggal">Hingga Tanggal</label>
+                        <input type="date" id="tanggalAkhir" name="tanggalAkhir" required>
+                    </div>
+                </div>
+
+                <div class="button-area">
+                    <button type="submit" class="submit-button">
+                        Buat Laporan
+                    </button>
+                </div>
+
+            </form>
+
+            <p class="note">
+                Sistem akan menolak transaksi jika jumlah keluar lebih besar dari stok barang.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Hasil Laporan</h2>
+
+            <input type="text" class="search-box" placeholder="Cari nama barang..." id="searchInput"
+                onkeyup="cariBarangKeluar()">
+
+            <div class="table-wrapper">
+                <table id="tabelBarangKeluar">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Barang</th>
+                            <th>Jumlah Masuk</th>
+                            <th>Jumlah Keluar</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% if barang_keluar_list %}
+                        {% for item in barang_keluar_list %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ item["nama_barang"] }}</td>
+                            <td class="jumlahMasuk">-{{ item["jumlahMasuk"] }}</td> // jumlah barang itu masuk
+                            <td class="jumlahKeluar">-{{ item["jumlahKeluar"] }}</td> // Jumlah Barang itu keluar
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan=" 7" class="empty-data">Belum ada permintaan membuat laporan.
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+</body>
+
+</html>
