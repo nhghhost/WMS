@@ -259,12 +259,12 @@ def tambah_barang_masuk(id_barang, jumlah, tanggal):
         """,
             (id_barang, jumlah, tanggal),
         )
-        cursor.execute(
-            """
-            UPDATE barang SET stok = stok + %s WHERE id_barang = %s
-        """,
-            (jumlah, id_barang),
-        )
+        # cursor.execute(
+            # """
+            # UPDATE barang SET stok = stok + %s WHERE # id_barang = %s
+        # """,
+            # (jumlah, id_barang),
+        # )
         conn.commit()
 
 
@@ -306,12 +306,12 @@ def update_barang_masuk(id_masuk, jumlah_baru, tanggal_baru):
             id_barang = data_lama["id_barang"]
             jumlah_lama = data_lama["jumlah"]
 
-            cursor.execute(
-                """
-                UPDATE barang SET stok = stok - %s + %s WHERE id_barang = %s
-            """,
-                (jumlah_lama, jumlah_baru, id_barang),
-            )
+            # cursor.execute(
+                # """
+                # UPDATE barang SET stok = stok - %s + %s # WHERE id_barang = %s
+            # "",
+                # (jumlah_lama, jumlah_baru, id_barang),
+            # )
 
             cursor.execute(
                 """
@@ -333,12 +333,12 @@ def hapus_barang_masuk(id_masuk):
         )
         data = cursor.fetchone()
         if data:
-            cursor.execute(
-                """
-                UPDATE barang SET stok = stok - %s WHERE id_barang = %s
-            """,
-                (data["jumlah"], data["id_barang"]),
-            )
+            # cursor.execute(
+                # """
+                # UPDATE barang SET stok = stok - %s WHERE # id_barang = %s
+            # """,
+                # (data["jumlah"], data["id_barang"]),
+            # )
             cursor.execute(
                 "DELETE FROM barang_masuk WHERE id_masuk = %s", (id_masuk,)
             )
@@ -375,12 +375,12 @@ def tambah_barang_keluar(id_barang, jumlah, tanggal, jenis_keluar, nama):
         )
 
         if jenis_keluar in ("habis", "pinjam"):
-            cursor.execute(
-                """
-                UPDATE barang SET stok = stok - %s WHERE id_barang = %s
-            """,
-                (jumlah, id_barang),
-            )
+            # cursor.execute(
+                # """
+                # UPDATE barang SET stok = stok - %s WHERE # id_barang = %s
+            # """,
+                # (jumlah, id_barang),
+            # )
 
         conn.commit()
 
@@ -412,12 +412,12 @@ def hapus_barang_keluar(id_keluar):
         )
         data = cursor.fetchone()
         if data:
-            cursor.execute(
-                """
-                UPDATE barang SET stok = stok + %s WHERE id_barang = %s
-            """,
-                (data["jumlah"], data["id_barang"]),
-            )
+            # cursor.execute(
+                # """
+                # UPDATE barang SET stok = stok + %s WHERE # id_barang = %s
+            # """,
+                # (data["jumlah"], data["id_barang"]),
+            # )
             cursor.execute(
                 "DELETE FROM barang_keluar WHERE id_keluar = %s", (id_keluar,)
             )
