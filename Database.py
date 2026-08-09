@@ -336,7 +336,7 @@ def hapus_barang_masuk(id_masuk):
         if data:
             cursor.execute(
                 """
-                UPDATE barang SET stok = stok - %s WHERE # id_barang = %s
+                UPDATE barang SET stok = stok - %s WHERE id_barang = %s
             """,
                 (data["jumlah"], data["id_barang"]),
             )
@@ -415,7 +415,7 @@ def hapus_barang_keluar(id_keluar):
         if data:
             cursor.execute(
                 """
-                UPDATE barang SET stok = stok + %s WHERE # id_barang = %s
+                UPDATE barang SET stok = stok + %s WHERE id_barang = %s
             """,
                 (data["jumlah"], data["id_barang"]),
             )
