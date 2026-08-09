@@ -262,7 +262,7 @@ def tambah_barang_masuk(id_barang, jumlah, tanggal):
         )
         cursor.execute(
             """
-            UPDATE barang SET stok = stok + %s WHERE # id_barang = %s
+            UPDATE barang SET stok = stok + %s WHERE id_barang = %s
         """,
             (jumlah, id_barang),
         )
