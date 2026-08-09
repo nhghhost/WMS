@@ -613,10 +613,17 @@
                 fd.append("jumlah", item.jumlah);
                 fd.append("jenis_keluar", item.jenis_keluar);
 
-                await fetch("/tambah-barang-keluar", {
+                const response = await fetch("/tambah-barang-keluar", {
                     method: "POST",
                     body: fd
                 });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    console.error("Server error:", response.status, text);
+                    alert("Gagal menyimpan barang. Cek terminal Flask.");
+                    return;
+                }
             }
 
             // Simpan tanggal supaya tetap terisi setelah halaman reload
