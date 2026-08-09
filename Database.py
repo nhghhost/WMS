@@ -5,6 +5,7 @@ import psycopg2.extras
 
 # Ambil URL Database dari Environment Vercel atau Gunakan Localhost jika kosong
 DATABASE_URL = os.environ.get("DATABASE_URL")
+print("DATABASE_URL:", DATABASE_URL)
 
 
 def get_raw_connection():
