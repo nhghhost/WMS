@@ -308,8 +308,8 @@ def update_barang_masuk(id_masuk, jumlah_baru, tanggal_baru):
 
             cursor.execute(
                 """
-                UPDATE barang SET stok = stok - %s + %s # WHERE id_barang = %s
-            "",
+                UPDATE barang SET stok = stok - %s + %s WHERE id_barang = %s
+            """,
                 (jumlah_lama, jumlah_baru, id_barang),
             )
 
