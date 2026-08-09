@@ -378,7 +378,7 @@ def tambah_barang_keluar(id_barang, jumlah, tanggal, jenis_keluar, nama):
         if jenis_keluar in ("habis"):
             cursor.execute(
                 """
-                 UPDATE barang SET stok = stok - %s WHERE # id_barang = %s
+                 UPDATE barang SET stok = stok - %s WHERE id_barang = %s
             """,
                 (jumlah, id_barang),
             )
