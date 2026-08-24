@@ -13,8 +13,8 @@ def get_raw_connection():
     if DATABASE_URL:
         # Menangani format URI postgres:// jika dari platform cloud tua
         db_url = DATABASE_URL
-        if db_url.startswith("postgres://"):
-            db_url = db_url.replace("postgres://", "postgresql://", 1)
+        #if db_url.startswith("postgres://"):
+            #db_url = db_url.replace("postgres://", "postgresql://", 1)
 
         return psycopg2.connect(db_url, sslmode="require")
     else:
