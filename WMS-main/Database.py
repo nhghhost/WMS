@@ -400,7 +400,7 @@ def ambil_semua_barang_keluar():
                 b.satuan
             FROM barang_keluar bk
             JOIN barang b ON bk.id_barang = b.id_barang
-            ORDER BY bk.id_keluar DESC
+            ORDER BY bk.tanggal DESC
         """)
         return cursor.fetchall()
 
